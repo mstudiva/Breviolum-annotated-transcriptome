@@ -1,4 +1,4 @@
-# Transcriptome Annotation, version January 3, 2023
+# Transcriptome Annotation, version January 11, 2023
 # Created by Misha Matz (matz@utexas.edu), modified by Michael Studivan (studivanms@gmail.com) for use on FAU's HPC (KoKo)
 # for use in generating transcriptome annotations for Breviolum
 
@@ -63,6 +63,18 @@ sed -i 's/Sym_/Breviolum/' Breviolum.fasta
 # this transcriptome has already been converted to protein translations, so skip to line 143
 # download from https://osf.io/gsn8p/ and scp to your annotate directory
 mv B1.annotated.fa Breviolum.fasta
+sed -i 's/TRINITY_DN/Breviolum/' Breviolum.fasta
+
+# Chen (2019)
+# get from https://espace.library.uq.edu.au/view/UQ:8279c9a
+gunzip Breviolum_minutum.CDS.fna.gz
+mv Breviolum_minutum.CDS.fna Breviolum.fasta
+sed -i 's/Bmin.gene/Breviolum/' Breviolum.fasta
+
+# Avila-Magana (August 2021)
+# from https://datadryad.org/stash/dataset/doi:10.5061/dryad.k3j9kd57b
+gunzip Symbio_Sider.fna.gz
+mv gunzip Symbio_Sider.fna Breviolum.fasta
 sed -i 's/TRINITY_DN/Breviolum/' Breviolum.fasta
 
 # transcriptome statistics
