@@ -1,6 +1,5 @@
-# Transcriptome Annotation, version January 11, 2023
+# Breviolum Transcriptome Annotation, version January 11, 2023
 # Created by Misha Matz (matz@utexas.edu), modified by Michael Studivan (studivanms@gmail.com) for use on FAU's HPC (KoKo)
-# for use in generating transcriptome annotations for Breviolum
 
 
 #------------------------------
@@ -84,7 +83,7 @@ launcher_creator.py -j seq_stats -n seq_stats -q shortq7 -t 6:00:00 -e studivanm
 sbatch seq_stats.slurm
 
 # transcriptome statistics from https://sites.bu.edu/davieslab/data-code/
-Breviolum.fasta (Davies)
+Breviolum.fasta (Rivera)
 -------------------------
 31970 sequences.
 1291 average length.
