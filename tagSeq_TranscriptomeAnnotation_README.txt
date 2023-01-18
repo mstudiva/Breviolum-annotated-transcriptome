@@ -1,4 +1,4 @@
-# Breviolum Transcriptome Annotation, version January 11, 2023
+# Breviolum Transcriptome Annotation, version January 18, 2023
 # Created by Misha Matz (matz@utexas.edu), modified by Michael Studivan (studivanms@gmail.com) for use on FAU's HPC (KoKo)
 
 
