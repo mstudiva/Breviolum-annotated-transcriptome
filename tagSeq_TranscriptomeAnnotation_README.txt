@@ -1,4 +1,4 @@
-# Breviolum Transcriptome Annotation, version January 18, 2023
+# Breviolum Transcriptome Annotation, version January 24, 2023
 # Created by Misha Matz (matz@utexas.edu), modified by Michael Studivan (studivanms@gmail.com) for use on FAU's HPC (KoKo)
 
 
@@ -70,11 +70,20 @@ gunzip Breviolum_minutum.CDS.fna.gz
 mv Breviolum_minutum.CDS.fna Breviolum.fasta
 sed -i 's/Bmin.gene/Breviolum/' Breviolum.fasta
 
-# Avila-Magana (August 2021)
+# Avila-Magana (August 2021, from Siderastrea radians host)
 # from https://datadryad.org/stash/dataset/doi:10.5061/dryad.k3j9kd57b
 gunzip Symbio_Sider.fna.gz
-mv gunzip Symbio_Sider.fna Breviolum.fasta
+mv Symbio_Sider.fna Breviolum.fasta
 sed -i 's/TRINITY_DN/Breviolum/' Breviolum.fasta
+
+# Avila-Magana (August 2021, from Pseudodiploria clivosa host)
+# from https://datadryad.org/stash/dataset/doi:10.5061/dryad.k3j9kd57b
+gunzip Symb_Dip.fna.gz
+mv Symb_Dip.fna Breviolum.fasta
+sed -i 's/TRINITY_DN/Breviolum/' Breviolum.fasta
+
+# Test each of the transcriptomes on a subset of our sequenced samples, and pick the one with the best alignment rates
+# See repository mstudiva/tag-based_RNAseq/tagSeq_processing_README.txt, L164-168 for details
 
 # transcriptome statistics
 conda activate bioperl
@@ -82,29 +91,28 @@ echo "seq_stats.pl Breviolum.fasta > seqstats_Breviolum.txt" > seq_stats
 launcher_creator.py -j seq_stats -n seq_stats -q shortq7 -t 6:00:00 -e studivanms@gmail.com
 sbatch seq_stats.slurm
 
-# transcriptome statistics from https://sites.bu.edu/davieslab/data-code/
-Breviolum.fasta (Rivera)
+Breviolum.fasta (Avila-Magana, from Siderastrea radians host)
 -------------------------
-31970 sequences.
-1291 average length.
-8436 maximum length.
-500 minimum length.
-N50 = 1458
-41.3 Mb altogether (41260850 bp).
+173968 sequences.
+628 average length.
+2459 maximum length.
+201 minimum length.
+N50 = 1040
+109.2 Mb altogether (109245170 bp).
 0 ambiguous Mb. (0 bp, 0%)
 0 Mb of Ns. (0 bp, 0%)
 -------------------------
 
-Breviolum.fasta (Camp)
+Breviolum.fasta (Avila-Magana, from Pseudodiploria clivosa host)
 -------------------------
-98555 sequences.
-335 average length.
-8046 maximum length.
-99 minimum length.
-N50 = 490
-33 Mb altogether (33040441 bp).
-25.4 ambiguous Mb. (25354444 bp, 76.7%)
-0.9 Mb of Ns. (945134 bp, 2.9%)
+184910 sequences.
+625 average length.
+25791 maximum length.
+201 minimum length.
+N50 = 1076
+115.7 Mb altogether (115651212 bp).
+0 ambiguous Mb. (0 bp, 0%)
+0 Mb of Ns. (0 bp, 0%)
 -------------------------
 
 
@@ -118,12 +126,13 @@ wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/c
 gunzip uniprot_sprot.fasta.gz &
 
 # indexing the fasta database
+module load blast-plus-2.11.0-gcc-9.2.0-5tzbbls
 echo "makeblastdb -in uniprot_sprot.fasta -dbtype prot" >mdb
 launcher_creator.py -j mdb -n mdb -q shortq7 -t 6:00:00 -e studivanms@gmail.com
 sbatch mdb.slurm
 
-# splitting the transcriptome into 100 chunks
-splitFasta.pl Breviolum.fasta 100
+# splitting the transcriptome into 200 chunks, or however many is needed to keep the number of seqs per chunk under 1000
+splitFasta.pl Breviolum.fasta 200
 
 # blasting all 200 chunks to uniprot in parallel, 4 cores per chunk
 ls subset* | perl -pe 's/^(\S+)$/blastx -query $1 -db uniprot_sprot\.fasta -evalue 0\.0001 -num_threads 4 -num_descriptions 5 -num_alignments 5 -out $1.br/'>bl
@@ -136,12 +145,15 @@ grep "Query= " subset*.br | wc -l
 
 # combining all blast results
 cat subset*br > myblast.br
-mv subset* ~/annotate/backup/
+rm subset*
 
 # for trinity-assembled transcriptomes: annotating with isogroups
 grep ">" Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+)\s.+/Breviolum$1$2\tBreviolum$1/'>Breviolum_seq2iso.tab
 cat Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+).+/>Breviolum$1$2 gene=Breviolum$1/'>Breviolum_iso.fasta
 
+# small tweak needed for Avila-Magana references to work
+grep ">" Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+).+/Breviolum$1$2\tBreviolum$1/'>Breviolum_seq2iso.tab
+cat Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+)/>Breviolum$1$2 gene=Breviolum$1/'>Breviolum_iso.fasta
 
 #-------------------------
 # extracting coding sequences and corresponding protein translations:
@@ -166,12 +178,12 @@ cd /path/to/local/directory
 scp mstudiva@koko-login.hpc.fau.edu:~/path/to/HPC/directory/*_out_PRO.fas .
 
 # copy link to job ID status and output file, paste it below instead of current link:
-# symB (Davies) status: http://eggnog-mapper.embl.de/job_status?jobname=MM_7hc47__h
-# symB (Camp) status: http://eggnog-mapper.embl.de/job_status?jobname=MM_0a0rsfk1
+# Avila-Magana (from Siderastrea radians host) status: http://eggnog-mapper.embl.de/job_status?jobname=MM_ygqyiztv
+# Avila-Magana (from Pseudodiploria clivosa host) status: http://eggnog-mapper.embl.de/job_status?jobname=MM_qoqesnpf
 
 # once it is done, download results to HPC:
-wget http://eggnog-mapper.embl.de/MM_7hc47__h/out.emapper.annotations # Davies
-wget http://eggnog-mapper.embl.de/MM_0a0rsfk1/out.emapper.annotations # Camp
+wget http://eggnog-mapper.embl.de/MM_ygqyiztv/out.emapper.annotations #  Avila-Magana (from Siderastrea radians host)
+wget http://eggnog-mapper.embl.de/MM_qoqesnpf/out.emapper.annotations # Avila-Magana (from Pseudodiploria clivosa host)
 
 # GO:
 awk -F "\t" 'BEGIN {OFS="\t" }{print $1,$10 }' out.emapper.annotations | grep GO | perl -pe 's/,/;/g' >Breviolum_iso2go.tab
@@ -202,12 +214,12 @@ cd /path/to/local/directory
 scp mstudiva@koko-login.hpc.fau.edu:~/path/to/HPC/directory/*4kegg.fasta .
 # use web browser to submit _4kegg.fasta file to KEGG's KAAS server http://www.genome.jp/kegg/kaas/
 # select SBH method, upload nucleotide query
-# symB (Davies) status: https://www.genome.jp/kaas-bin/kaas_main?mode=user&id=1672971915&key=JaGOMN7D
-# symB (Camp) status: https://www.genome.jp/kaas-bin/kaas_main?mode=user&id=1673036132&key=n9SFDxIG
+# Avila-Magana (from Siderastrea radians host) status: https://www.genome.jp/kaas-bin/kaas_main?mode=user&id=1674592881&key=rPpl5yNQ
+# Avila-Magana (from Pseudodiploria clivosa host) status: https://www.genome.jp/kaas-bin/kaas_main?mode=user&id=1674595251&key=h7DZvFDQ
 
 # Once it is done, download to HPC - it is named query.ko by default
-wget https://www.genome.jp/tools/kaas/files/dl/1672971915/query.ko # Davies
-wget https://www.genome.jp/tools/kaas/files/dl/1673035930/query.ko # Camp
+wget https://www.genome.jp/tools/kaas/files/dl/1674592881/query.ko # Avila-Magana (from Siderastrea radians host)
+wget https://www.genome.jp/tools/kaas/files/dl/1674595251/query.ko # Avila-Magana (from Pseudodiploria clivosa host)
 
 # selecting only the lines with non-missing annotation:
 cat query.ko | awk '{if ($2!="") print }' > Breviolum_iso2kegg.tab

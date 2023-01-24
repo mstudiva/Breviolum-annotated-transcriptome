@@ -1,0 +1,13 @@
+
+Breviolum.fasta
+-------------------------
+184910 sequences.
+625 average length.
+25791 maximum length.
+201 minimum length.
+N50 = 1076
+115.7 Mb altogether (115651212 bp).
+0 ambiguous Mb. (0 bp, 0%)
+0 Mb of Ns. (0 bp, 0%)
+-------------------------
+
