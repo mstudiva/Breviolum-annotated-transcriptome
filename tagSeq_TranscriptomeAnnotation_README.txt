@@ -1,4 +1,4 @@
-# Breviolum Transcriptome Annotation, version January 24, 2023
+# Breviolum Transcriptome Annotation, version January 1, 2025
 # Created by Misha Matz (matz@utexas.edu), modified by Michael Studivan (studivanms@gmail.com) for use on FAU's HPC (KoKo)
 
 
@@ -152,11 +152,15 @@ grep ">" Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+)\s.+/Breviolum$1$2\tB
 cat Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+).+/>Breviolum$1$2 gene=Breviolum$1/'>Breviolum_iso.fasta
 
 # small tweak needed for Avila-Magana references to work
-grep ">" Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+).+/Breviolum$1$2\tBreviolum$1/'>Breviolum_seq2iso.tab
-cat Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+)/>Breviolum$1$2 gene=Breviolum$1/'>Breviolum_iso.fasta
+grep ">" Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+)/Breviolum$1$2\tBreviolum$1/'>Breviolum_seq2iso.tab # (Sradians host)
+grep ">" Breviolum.fasta | perl -pe 's/>Breviolum(\d+)([^ \t]*)[ \t].*/Breviolum$1$2\tBreviolum$1/'>Breviolum_seq2iso.tab # (Pclivosa host)
+cat Breviolum.fasta | perl -pe 's/>Breviolum(\d+)(\S+)/>Breviolum$1$2 gene=Breviolum$1/'>Breviolum_iso.fasta # (Sradians host)
+cat Breviolum.fasta | perl -pe 's/>Breviolum(\d+)([^ \t]*)[ \t].*/Breviolum$1$2 gene=Breviolum$1/' > Breviolum_iso.fasta # (Pclivosa host)
+
 
 #-------------------------
 # extracting coding sequences and corresponding protein translations:
+conda activate bioperl # if not active already
 echo "perl ~/bin/CDS_extractor_v2.pl Breviolum_iso.fasta myblast.br allhits bridgegaps" >cds
 launcher_creator.py -j cds -n cds -l cddd -t 6:00:00 -q shortq7 -e studivanms@gmail.com
 sbatch cddd
