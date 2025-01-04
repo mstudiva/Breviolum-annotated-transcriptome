@@ -1,4 +1,4 @@
-# Breviolum Transcriptome Annotation, version January 1, 2025
+# Breviolum Transcriptome Annotation, version January 3, 2025
 # Created by Misha Matz (matz@utexas.edu), modified by Michael Studivan (studivanms@gmail.com) for use on FAU's HPC (KoKo)
 
 
@@ -230,6 +230,17 @@ cat query.ko | awk '{if ($2!="") print }' > Breviolum_iso2kegg.tab
 
 # the KEGG mapping result can be explored for completeness of transcriptome in terms of genes found,
 # use 'html' output link from KAAS result page, see how many proteins you have for conserved complexes and pathways, such as ribosome, spliceosome, proteasome etc
+
+
+#------------------------------
+# Converting isogoup lookup tables to orthogroups (for mixed symbiont assemblages)
+
+srun perl ~/bin/rename_isogroup_by_orthogroup.pl orthologs_unique.txt Breviolum_iso2geneName.tab Breviolum_ortho2geneName.tab
+srun perl ~/bin/rename_isogroup_by_orthogroup.pl orthologs_unique.txt Breviolum_iso2go.tab Breviolum_ortho2go.tab
+srun perl ~/bin/rename_isogroup_by_orthogroup.pl orthologs_unique.txt Breviolum_iso2kegg.tab Breviolum_ortho2kegg.tab
+srun perl ~/bin/rename_isogroup_by_orthogroup.pl orthologs_unique.txt Breviolum_iso2kogClass1.tab Breviolum_ortho2kogClass1.tab
+srun perl ~/bin/rename_isogroup_by_orthogroup.pl orthologs_unique.txt Breviolum_iso2kogClass.tab Breviolum_ortho2kogClass.tab
+srun perl ~/bin/rename_seq2iso_by_orthogroup.pl Breviolum_seq2iso.tab orthologs_unique.txt Breviolum_seq2ortho.tab
 
 
 #------------------------------
